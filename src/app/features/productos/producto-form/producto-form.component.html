@@ -1,0 +1,70 @@
+<div class="panel">
+  <h2>{{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="enviar()">
+    @if (error()) {
+      <div class="banner-error">{{ error() }}</div>
+    }
+
+    <div class="field">
+      <label for="codigo">Código del Producto *</label>
+      <input id="codigo" type="text" formControlName="codigo" maxlength="50" [readonly]="esEdicion" />
+      @if (form.controls.codigo.invalid && form.controls.codigo.touched) {
+        <span class="field-error">El código es obligatorio (máx. 50 caracteres).</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="nombre">Nombre *</label>
+      <input id="nombre" type="text" formControlName="nombre" maxlength="100" />
+      @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+        <span class="field-error">El nombre es obligatorio (máx. 100 caracteres).</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" formControlName="descripcion" rows="3" maxlength="200"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="imagenUrl">URL de la Imagen</label>
+      <input id="imagenUrl" type="url" formControlName="imagenUrl" placeholder="https://ejemplo.com/imagen.jpg" />
+      @if (form.get('imagenUrl')?.value) {
+        <div class="imagen-preview">
+          <img [src]="form.get('imagenUrl')?.value" alt="Preview" />
+        </div>
+      }
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="precio">Precio (S/) *</label>
+        <input id="precio" type="number" step="0.10" min="0" formControlName="precio" />
+        @if (form.controls.precio.invalid && form.controls.precio.touched) {
+          <span class="field-error">Ingresa un precio válido.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="stock">Stock (unidades) *</label>
+        <input id="stock" type="number" min="0" formControlName="stock" />
+        @if (form.controls.stock.invalid && form.controls.stock.touched) {
+          <span class="field-error">Ingresa una cantidad válida.</span>
+        }
+      </div>
+    </div>
+
+    <label class="field-checkbox">
+      <input type="checkbox" formControlName="activo" />
+      Visible en el catálogo
+    </label>
+
+    <div class="panel-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancelado.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</div>

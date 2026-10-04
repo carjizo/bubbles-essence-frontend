@@ -1,0 +1,144 @@
+<div class="registro-container">
+  <div class="registro-card">
+    <div class="registro-header">
+      <div class="registro-logo-circle">b&e</div>
+    </div>
+    <h1>✍️ Crear Cuenta</h1>
+    <p class="subtitle">Regístrate para acceder a tu panel de pedidos</p>
+
+    @if (error()) {
+      <div class="alert alert-danger" role="alert">
+        {{ error() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="enviar()">
+      <!-- Documento -->
+      <div class="form-group">
+        <label for="documento">Documento (DNI/Cédula) *</label>
+        <input
+          type="text"
+          id="documento"
+          formControlName="documento"
+          class="form-control"
+          placeholder="Ej: 12345678"
+          [class.is-invalid]="form.get('documento')?.invalid && form.get('documento')?.touched"
+        />
+        @if (form.get('documento')?.hasError('required') && form.get('documento')?.touched) {
+          <div class="invalid-feedback">El documento es requerido</div>
+        }
+        @if (form.get('documento')?.hasError('minlength') || form.get('documento')?.hasError('maxlength')) {
+          <div class="invalid-feedback">Debe tener entre 6 y 20 caracteres</div>
+        }
+      </div>
+
+      <!-- Nombre Completo -->
+      <div class="form-group">
+        <label for="nombreCompleto">Nombre Completo *</label>
+        <input
+          type="text"
+          id="nombreCompleto"
+          formControlName="nombreCompleto"
+          class="form-control"
+          placeholder="Ej: Juan Pérez"
+          [class.is-invalid]="form.get('nombreCompleto')?.invalid && form.get('nombreCompleto')?.touched"
+        />
+        @if (form.get('nombreCompleto')?.hasError('required') && form.get('nombreCompleto')?.touched) {
+          <div class="invalid-feedback">El nombre es requerido</div>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="correo">Email *</label>
+        <input
+          type="email"
+          id="correo"
+          formControlName="correo"
+          class="form-control"
+          placeholder="Ej: tu@email.com"
+          [class.is-invalid]="form.get('correo')?.invalid && form.get('correo')?.touched"
+        />
+        @if (form.get('correo')?.hasError('required') && form.get('correo')?.touched) {
+          <div class="invalid-feedback">El email es requerido</div>
+        }
+        @if (form.get('correo')?.hasError('email') && form.get('correo')?.touched) {
+          <div class="invalid-feedback">Email inválido</div>
+        }
+      </div>
+
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label for="telefono">Teléfono *</label>
+        <input
+          type="tel"
+          id="telefono"
+          formControlName="telefono"
+          class="form-control"
+          placeholder="Ej: 987654321"
+          [class.is-invalid]="form.get('telefono')?.invalid && form.get('telefono')?.touched"
+        />
+        @if (form.get('telefono')?.hasError('required') && form.get('telefono')?.touched) {
+          <div class="invalid-feedback">El teléfono es requerido</div>
+        }
+        @if (form.get('telefono')?.hasError('pattern') && form.get('telefono')?.touched) {
+          <div class="invalid-feedback">Teléfono debe tener 7-15 dígitos</div>
+        }
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="clave">Contraseña *</label>
+        <div class="password-input-group">
+          <input
+            [type]="mostrarPassword() ? 'text' : 'password'"
+            id="clave"
+            formControlName="clave"
+            class="form-control"
+            placeholder="Mínimo 8 caracteres"
+            [class.is-invalid]="form.get('clave')?.invalid && form.get('clave')?.touched"
+          />
+          <button type="button" class="toggle-password" (click)="togglePassword()">
+            {{ mostrarPassword() ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        @if (form.get('clave')?.hasError('required') && form.get('clave')?.touched) {
+          <div class="invalid-feedback">La contraseña es requerida</div>
+        }
+        @if (form.get('clave')?.hasError('minlength') && form.get('clave')?.touched) {
+          <div class="invalid-feedback">Mínimo 8 caracteres</div>
+        }
+      </div>
+
+      <!-- Confirmar Contraseña -->
+      <div class="form-group">
+        <label for="confirmarClave">Confirmar Contraseña *</label>
+        <input
+          [type]="mostrarPassword() ? 'text' : 'password'"
+          id="confirmarClave"
+          formControlName="confirmarClave"
+          class="form-control"
+          placeholder="Repite tu contraseña"
+          [class.is-invalid]="form.get('confirmarClave')?.invalid && form.get('confirmarClave')?.touched"
+        />
+        @if (form.get('confirmarClave')?.hasError('required') && form.get('confirmarClave')?.touched) {
+          <div class="invalid-feedback">Debe confirmar la contraseña</div>
+        }
+      </div>
+
+      <!-- Botón Enviar -->
+      <button type="submit" class="btn btn-primary w-100" [disabled]="cargando()">
+        @if (cargando()) {
+          <span>⏳ Registrando...</span>
+        } @else {
+          <span>✅ Crear Cuenta</span>
+        }
+      </button>
+    </form>
+
+    <!-- Link a Login -->
+    <p class="text-center mt-3">
+      ¿Ya tienes cuenta? <a routerLink="/cliente/login">Inicia sesión aquí</a>
+    </p>
+  </div>
+</div>

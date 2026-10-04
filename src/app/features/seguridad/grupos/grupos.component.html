@@ -1,0 +1,138 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Gestión de Grupos</h1>
+      <p class="page-subtitle">Crea grupos y asigna acciones/usuarios a ellos.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="abrirCrear()">
+      + Nuevo grupo
+    </button>
+  </header>
+
+  @if (error()) {
+    <div class="banner-error">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <p class="page-estado">Cargando grupos…</p>
+  } @else if (grupos().length === 0) {
+    <p class="page-estado">No hay grupos definidos aún.</p>
+  } @else {
+    <div class="grid-grupos">
+      @for (grupo of grupos(); track trackById($index, grupo)) {
+        <div class="card-grupo">
+          <div class="card-header">
+            <h3>{{ grupo.nombre }}</h3>
+            <span class="badge" [class.badge-success]="grupo.activo" [class.badge-muted]="!grupo.activo">
+              {{ grupo.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          <p class="card-codigo"><code>{{ grupo.codigo }}</code></p>
+          @if (grupo.descripcion) {
+            <p class="card-desc">{{ grupo.descripcion }}</p>
+          }
+          <div class="card-actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="abrirDetalle(grupo)">Gestionar</button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="abrirEditar(grupo)">Editar</button>
+            <button type="button" class="btn" [class.btn-danger]="grupo.activo" [class.btn-success]="!grupo.activo" (click)="toggleEstado(grupo)">
+              {{ grupo.activo ? 'Desactivar' : 'Activar' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (vistaFormulario(); as vista) {
+    <div class="modal-overlay" (click)="cerrarFormulario()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>{{ vista.modo === 'crear' ? 'Nuevo grupo' : 'Editar grupo' }}</h2>
+        <p class="modal-subtitle">{{ vista.modo === 'crear' ? 'Crea un nuevo grupo' : 'Actualiza los datos del grupo' }}</p>
+        <app-grupo-form
+          [grupo]="vista.modo === 'editar' ? vista.grupo : undefined"
+          (guardado)="alGuardarGrupo($event)"
+          (cancelado)="cerrarFormulario()"
+        ></app-grupo-form>
+      </div>
+    </div>
+  }
+
+  @if (vistaDetalle(); as detalle) {
+    <div class="modal-overlay" (click)="cerrarDetalle()">
+      <div class="modal modal-large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ detalle.grupo.nombre }}</h2>
+          <button type="button" class="btn-close" (click)="cerrarDetalle()">&times;</button>
+        </div>
+
+        <div class="modal-content">
+          <div class="section">
+            <h3>Acciones del grupo</h3>
+            @if (detalle.acciones.length === 0) {
+              <p class="empty">Sin acciones asignadas</p>
+            } @else {
+              <ul class="item-list">
+                @for (accion of detalle.acciones; track trackById($index, accion)) {
+                  <li>
+                    <span>{{ accion.nombre }} <code>{{ accion.codigo }}</code></span>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="quitarAccion(detalle.grupo.id, accion.id)">
+                      Quitar
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <p class="section-subtitle">Añadir acción:</p>
+            <select class="form-control" #selectAccion>
+              <option value="">-- Selecciona una acción --</option>
+              @for (accion of todasLasAcciones(); track trackById($index, accion)) {
+                @if (!accionYaAsignada(accion.id)) {
+                  <option [value]="accion.id">{{ accion.nombre }}</option>
+                }
+              }
+            </select>
+            <button type="button" class="btn btn-primary btn-sm" (click)="asignarAccion(detalle.grupo.id, +selectAccion.value)">
+              Asignar
+            </button>
+          </div>
+
+          <div class="section">
+            <h3>Usuarios del grupo</h3>
+            @if (detalle.usuarios.length === 0) {
+              <p class="empty">Sin usuarios</p>
+            } @else {
+              <ul class="item-list">
+                @for (usuario of detalle.usuarios; track trackById($index, usuario)) {
+                  <li>
+                    <span>{{ usuario.nombreCompleto }} ({{ usuario.usuario }})</span>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="quitarUsuario(detalle.grupo.id, usuario.id)">
+                      Quitar
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <p class="section-subtitle">Añadir usuario:</p>
+            <select class="form-control" #selectUsuario>
+              <option value="">-- Selecciona un usuario --</option>
+              @for (usuario of todosLosUsuarios(); track trackById($index, usuario)) {
+                @if (!usuarioYaAsignado(usuario.id)) {
+                  <option [value]="usuario.id">{{ usuario.nombreCompleto }}</option>
+                }
+              }
+            </select>
+            <button type="button" class="btn btn-primary btn-sm" (click)="asignarUsuario(detalle.grupo.id, +selectUsuario.value)">
+              Asignar
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarDetalle()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,76 @@
+<div class="detalle">
+  <a routerLink="/cliente" class="link-volver">← Volver al catálogo</a>
+
+  @if (error()) {
+    <div class="banner-error">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <p>Cargando producto...</p>
+  } @else {
+    @if (producto()) {
+      <div class="contenedor-detalle">
+        <div class="producto-imagen-grande">
+          @if (producto()!.imagenUrl) {
+            <img [src]="producto()!.imagenUrl" [alt]="producto()!.nombre" />
+          } @else {
+            <div class="placeholder">📦</div>
+          }
+        </div>
+
+        <div class="producto-detalles">
+          <h1>{{ producto()!.nombre }}</h1>
+          @if (producto()!.descripcion) {
+            <p class="descripcion">{{ producto()!.descripcion }}</p>
+          }
+
+          <div class="info-producto">
+            <div class="precio-grande">{{ formatoPrecio(producto()!.precio) }}</div>
+            <div class="stock-info">
+              @if (producto()!.stock > 0) {
+                <span class="stock-disponible">{{ producto()!.stock }} unidades disponibles</span>
+              } @else {
+                <span class="stock-agotado">Producto Agotado</span>
+              }
+            </div>
+          </div>
+
+          @if (producto()!.stock > 0) {
+            <div class="selector-cantidad">
+              <label for="cantidad">Cantidad:</label>
+              <div class="cantidad-control">
+                <button type="button" (click)="decrementarCantidad()" class="btn-cantidad">−</button>
+                <input type="number" id="cantidad" [(ngModel)]="cantidad" readonly class="cantidad-input" />
+                <button type="button" (click)="incrementarCantidad()" class="btn-cantidad">+</button>
+              </div>
+            </div>
+
+            <div class="subtotal">
+              Subtotal: <strong>{{ formatoPrecio(subtotal) }}</strong>
+            </div>
+
+            <button
+              type="button"
+              (click)="agregarAlCarrito()"
+              [disabled]="agredandoAlCarrito()"
+              class="btn btn-primary btn-lg"
+            >
+              🛒 Agregar al Carrito
+            </button>
+
+            @if (mensajeExito()) {
+              <div class="mensaje-exito">
+                ✓ {{ mensajeExito() }}
+              </div>
+            }
+          }
+
+          <div class="codigo-producto">
+            <span class="label">Código:</span>
+            <code>{{ producto()!.codigo }}</code>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

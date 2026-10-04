@@ -1,0 +1,57 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-mark">b&amp;e</span>
+      <div>
+        <strong>Bubbles &amp; Essence</strong>
+        <span>Panel interno</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of itemsMenu(); track item.codigo) {
+        @if (item.ruta) {
+          <a [routerLink]="item.ruta" routerLinkActive="activo" class="sidebar-link">
+            {{ item.nombre }}
+          </a>
+        } @else {
+          <span class="sidebar-link sidebar-link-pendiente" title="Pantalla aún no construida en el front">
+            {{ item.nombre }}
+            <small>próximamente</small>
+          </span>
+        }
+      }
+
+      @if (itemsMenu().length === 0) {
+        <p class="sidebar-empty">Tu usuario no tiene módulos asignados todavía. Pídele a un administrador que te agregue a un grupo.</p>
+      }
+
+      @if (puedeAccederAdmin()) {
+        <div class="sidebar-section">
+          <a routerLink="/admin" routerLinkActive="activo" class="sidebar-link sidebar-link-admin">
+            ⚙️ Administración
+          </a>
+        </div>
+      }
+    </nav>
+  </aside>
+
+  <div class="shell-main">
+    <header class="topbar">
+      <div class="topbar-spacer"></div>
+      @if (usuario(); as u) {
+        <div class="topbar-user">
+          <div class="topbar-user-info">
+            <strong>{{ u.nombreCompleto }}</strong>
+            <span>{{ u.rol }}</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="cerrarSesion()">Salir</button>
+        </div>
+      }
+    </header>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

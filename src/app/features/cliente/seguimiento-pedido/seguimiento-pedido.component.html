@@ -1,0 +1,105 @@
+<div class="seguimiento-container">
+  <div class="header">
+    <h1>📍 Seguimiento de Pedido</h1>
+    <p class="subtitle">Ingresa tu número de pedido y DNI para ver el estado de tu compra</p>
+    <a routerLink="/cliente" class="btn btn-secondary btn-sm">
+      Volver al catálogo
+    </a>
+  </div>
+
+  @if (error()) {
+    <div class="banner-error">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Formulario de búsqueda de invitado -->
+  @if (mostrarFormulario()) {
+    <div class="card-busqueda">
+      <form (ngSubmit)="buscar()">
+        <div class="form-group">
+          <label for="codigoPedido">Código de Pedido *</label>
+          <input
+            type="text"
+            id="codigoPedido"
+            [ngModel]="codigoPedido()"
+            (ngModelChange)="codigoPedido.set($event)"
+            name="codigo"
+            class="form-control"
+            placeholder="Ej: PED-2026-000001"
+            [disabled]="cargando()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dniCliente">DNI/Cédula *</label>
+          <input
+            type="text"
+            id="dniCliente"
+            [ngModel]="dniCliente()"
+            (ngModelChange)="dniCliente.set($event)"
+            name="dni"
+            class="form-control"
+            placeholder="Ej: 12345678"
+            [disabled]="cargando()"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="cargando()">
+          {{ cargando() ? '⏳ Buscando...' : '🔍 Buscar Pedido' }}
+        </button>
+      </form>
+
+      <p class="ayuda">
+        💡 Puedes encontrar el código y DNI en tu confirmación de pedido
+      </p>
+    </div>
+  }
+
+  <!-- Resultado de búsqueda -->
+  @if (cargando() && !mostrarFormulario()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>⏳ Buscando tu pedido...</p>
+    </div>
+  } @else if (pedido()) {
+    <div class="card-pedido-encontrado">
+      <div class="card-header">
+        <span class="codigo">{{ pedido()!.codigoPedido }}</span>
+        <span [class]="'badge-' + getEstadoClass(pedido()!.estadoPedido)">
+          {{ getEstadoTexto(pedido()!.estadoPedido) }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="info-row">
+          <label>Monto Total:</label>
+          <span class="monto">{{ formatoPrecio(pedido()!.montoTotal) }}</span>
+        </div>
+
+        <div class="info-row">
+          <label>Tipo de Entrega:</label>
+          <span>{{ pedido()!.tipoEntrega }}</span>
+        </div>
+
+        <div class="info-row">
+          <label>Fecha de Pedido:</label>
+          <span>{{ formatoFecha(pedido()!.fechaPedido) }}</span>
+        </div>
+
+        @if (pedido()!.detalles?.length) {
+          <div class="info-row">
+            <label>Productos:</label>
+            <span class="badge-count">{{ pedido()!.detalles?.length || 0 }} producto(s)</span>
+          </div>
+        }
+      </div>
+
+      <div class="card-footer">
+        <button (click)="nuevaBusqueda()" class="btn btn-secondary btn-block">
+          🔄 Buscar Otro Pedido
+        </button>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,73 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo-circle">b&e</div>
+    </div>
+    <h1>🔐 Iniciar Sesión</h1>
+    <p class="subtitle">Accede a tu panel de pedidos</p>
+
+    @if (error()) {
+      <div class="alert alert-danger" role="alert">
+        {{ error() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="enviar()">
+      <!-- Documento -->
+      <div class="form-group">
+        <label for="documento">Documento (DNI/Cédula) *</label>
+        <input
+          type="text"
+          id="documento"
+          formControlName="documento"
+          class="form-control"
+          placeholder="Ej: 12345678"
+          [class.is-invalid]="form.get('documento')?.invalid && form.get('documento')?.touched"
+        />
+        @if (form.get('documento')?.hasError('required') && form.get('documento')?.touched) {
+          <div class="invalid-feedback">El documento es requerido</div>
+        }
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="clave">Contraseña *</label>
+        <div class="password-input-group">
+          <input
+            [type]="mostrarPassword() ? 'text' : 'password'"
+            id="clave"
+            formControlName="clave"
+            class="form-control"
+            placeholder="Tu contraseña"
+            [class.is-invalid]="form.get('clave')?.invalid && form.get('clave')?.touched"
+          />
+          <button type="button" class="toggle-password" (click)="togglePassword()">
+            {{ mostrarPassword() ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        @if (form.get('clave')?.hasError('required') && form.get('clave')?.touched) {
+          <div class="invalid-feedback">La contraseña es requerida</div>
+        }
+      </div>
+
+      <!-- Botón Enviar -->
+      <button type="submit" class="btn btn-primary w-100" [disabled]="cargando()">
+        @if (cargando()) {
+          <span>⏳ Iniciando sesión...</span>
+        } @else {
+          <span>🔓 Iniciar Sesión</span>
+        }
+      </button>
+    </form>
+
+    <!-- Link a Registro -->
+    <p class="text-center mt-3">
+      ¿No tienes cuenta? <a routerLink="/cliente/registro">Regístrate aquí</a>
+    </p>
+
+    <!-- Link a Inicio -->
+    <p class="text-center mt-2">
+      <a routerLink="/cliente" class="link-secondary">← Volver al catálogo</a>
+    </p>
+  </div>
+</div>

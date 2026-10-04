@@ -1,0 +1,56 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-brand-circle">b&e</div>
+      <h1>Bubbles &amp; Essence</h1>
+      <p class="login-brand-sub">Panel interno</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="enviar()" class="login-form">
+      @if (error()) {
+        <div class="banner-error">{{ error() }}</div>
+      }
+
+      <div class="field">
+        <label for="usuario">Usuario</label>
+        <input id="usuario" type="text" formControlName="usuario" autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label for="clave">Contraseña</label>
+        <div class="password-field">
+          <input 
+            id="clave" 
+            [type]="mostrarPassword() ? 'text' : 'password'" 
+            formControlName="clave" 
+            autocomplete="current-password" 
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePassword()"
+            tabindex="-1"
+          >
+            {{ mostrarPassword() ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-submit" [disabled]="cargando()">
+        {{ cargando() ? 'Ingresando…' : 'Ingresar' }}
+      </button>
+    </form>
+
+    <!-- Link para clientes externos -->
+    <div class="cliente-section">
+      <hr class="divider" />
+      <a routerLink="/cliente" class="cliente-link">
+        ¿Eres cliente externo? → Ir al Catálogo
+      </a>
+      <a routerLink="/cliente/registro" class="btn btn-secondary w-100">
+        ✍️ Crear Cuenta
+      </a>
+      <p class="cliente-subtext">O <a routerLink="/cliente/login">inicia sesión aquí</a></p>
+    </div>
+  </div>
+</div>

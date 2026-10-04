@@ -1,0 +1,73 @@
+<div class="mis-pedidos-container">
+  <header class="header-seccion">
+    <h1>📦 Mis Pedidos</h1>
+    <p class="subtitle">Aquí puedes ver todos tus pedidos y su estado</p>
+  </header>
+
+  @if (error()) {
+    <div class="banner-error">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando tus pedidos...</p>
+    </div>
+  } @else if (misPedidos().length === 0) {
+    <div class="empty-container">
+      <div class="empty-icon">📭</div>
+      <h2>No tienes pedidos aún</h2>
+      <p>¡Comienza a comprar! Todos tus pedidos aparecerán aquí.</p>
+      <a routerLink="/cliente" class="btn btn-primary">
+        🛍️ Ir al Catálogo
+      </a>
+    </div>
+  } @else {
+    <div class="pedidos-grid">
+      @for (pedido of misPedidos(); track pedido.id) {
+        <div class="card-pedido">
+          <div class="card-header">
+            <span class="codigo-pedido">{{ pedido.codigoPedido }}</span>
+            <span [ngClass]="'badge-' + getEstadoClass(pedido.estadoPedido)">
+              {{ getEstadoTexto(pedido.estadoPedido) }}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <div class="info-row">
+              <label>Monto Total:</label>
+              <span class="monto">{{ formatoPrecio(pedido.montoTotal) }}</span>
+            </div>
+
+            <div class="info-row">
+              <label>Tipo de Entrega:</label>
+              <span>{{ pedido.tipoEntrega }}</span>
+            </div>
+
+            <div class="info-row">
+              <label>Fecha de Pedido:</label>
+              <span>{{ formatoFecha(pedido.fechaPedido) }}</span>
+            </div>
+
+            @if (pedido.detalles?.length) {
+              <div class="info-row">
+                <label>Productos:</label>
+                <span class="badge-count">{{ pedido.detalles?.length || 0 }} producto(s)</span>
+              </div>
+            }
+          </div>
+
+          <div class="card-footer">
+            <a
+              [routerLink]="['/cliente/seguimiento']"
+              [queryParams]="{ codigo: pedido.codigoPedido }"
+              class="btn btn-secondary btn-sm"
+            >
+              Ver Detalles
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

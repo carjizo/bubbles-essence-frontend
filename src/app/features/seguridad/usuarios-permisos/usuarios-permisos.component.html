@@ -1,0 +1,145 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Gestión de Permisos por Usuario</h1>
+      <p class="page-subtitle">Asigna o niega permisos específicos a usuarios (excepciones).</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="banner-error">{{ error() }}</div>
+  }
+
+  <div class="layout-dos-columnas">
+    <!-- COLUMNA IZQUIERDA: Listado de usuarios -->
+    <aside class="sidebar-usuarios">
+      <h3>Usuarios</h3>
+      @if (cargando()) {
+        <p class="empty">Cargando…</p>
+      } @else if (usuarios().length === 0) {
+        <p class="empty">Sin usuarios</p>
+      } @else {
+        <ul class="usuarios-lista">
+          @for (usuario of usuarios(); track trackById($index, usuario)) {
+            <li
+              [class.seleccionado]="usuarioSeleccionado()?.id === usuario.id"
+              (click)="seleccionarUsuario(usuario)"
+              class="usuario-item"
+            >
+              <div class="usuario-nombre">{{ usuario.nombreCompleto }}</div>
+              <div class="usuario-login">{{ usuario.usuario }}</div>
+              <span class="badge" [class.badge-success]="usuario.activo" [class.badge-muted]="!usuario.activo">
+                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </aside>
+
+    <!-- COLUMNA DERECHA: Matriz de permisos -->
+    <main class="main-permisos">
+      @if (!usuarioSeleccionado()) {
+        <div class="placeholder">
+          <p>Selecciona un usuario para ver y gestionar sus permisos</p>
+        </div>
+      } @else {
+        <div class="usuario-seleccionado">
+          <h2>{{ usuarioSeleccionado()!.nombreCompleto }}</h2>
+          <p class="usuario-info">
+            Usuario: <code>{{ usuarioSeleccionado()!.usuario }}</code> | Rol: <strong>{{ usuarioSeleccionado()!.rol }}</strong>
+          </p>
+        </div>
+
+        @if (cargandoPermisos()) {
+          <p class="empty">Cargando permisos…</p>
+        } @else {
+          <!-- Permisos puntuales actuales -->
+          @if (permisosPuntuales().length > 0) {
+            <div class="seccion-permisos">
+              <h3>Permisos específicos asignados</h3>
+              <ul class="permisos-lista">
+                @for (permiso of permisosPuntuales(); track trackById($index, permiso)) {
+                  <li class="permiso-item">
+                    <span class="permiso-info">
+                      <span class="permiso-accion">{{ permiso.accionNombre }}</span>
+                      <span class="permiso-codigo"><code>{{ permiso.accionCodigo }}</code></span>
+                      <span class="permiso-tipo" [class.grant]="permiso.tipo === 'GRANT'" [class.deny]="permiso.tipo === 'DENY'">
+                        {{ permiso.tipo === 'GRANT' ? '✓ PERMITE' : '✗ DENIEGA' }}
+                      </span>
+                    </span>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="quitarPermiso(usuarioSeleccionado()!.id, permiso.accionId)">
+                      Quitar
+                    </button>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <!-- Matriz de acciones disponibles para asignar/negar -->
+          <div class="seccion-matriz">
+            <h3>Asignar nuevo permiso</h3>
+            @if (todasLasAcciones().length === 0) {
+              <p class="empty">No hay acciones disponibles</p>
+            } @else {
+              <div class="tabla-permisos-wrapper">
+                <table class="tabla-permisos">
+                  <thead>
+                    <tr>
+                      <th>Acción</th>
+                      <th class="col-acciones">Permite</th>
+                      <th class="col-acciones">Deniega</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (accion of todasLasAcciones(); track trackById($index, accion)) {
+                      <tr>
+                        <td>
+                          <span class="accion-nombre">{{ accion.nombre }}</span>
+                          <span class="accion-codigo"><code>{{ accion.codigo }}</code></span>
+                        </td>
+                        <td class="col-acciones">
+                          @if (obtenerEstadoPermiso(accion.id) === 'grant') {
+                            <button type="button" class="btn-check btn-check-active" title="Ya está permitida">
+                              ✓
+                            </button>
+                          } @else {
+                            <button
+                              type="button"
+                              class="btn-check"
+                              (click)="asignarPermiso(usuarioSeleccionado()!.id, accion.id, 'GRANT')"
+                              title="Permitir esta acción"
+                            >
+                              +
+                            </button>
+                          }
+                        </td>
+                        <td class="col-acciones">
+                          @if (obtenerEstadoPermiso(accion.id) === 'deny') {
+                            <button type="button" class="btn-check btn-check-active" title="Ya está denegada">
+                              ✗
+                            </button>
+                          } @else {
+                            <button
+                              type="button"
+                              class="btn-check"
+                              (click)="asignarPermiso(usuarioSeleccionado()!.id, accion.id, 'DENY')"
+                              title="Denegar esta acción"
+                            >
+                              −
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.angular/
+*.log
+
+.vercel/
+.vscode/
+.idea/
+.DS_Store

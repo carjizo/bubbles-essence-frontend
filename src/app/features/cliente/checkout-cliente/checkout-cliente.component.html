@@ -1,0 +1,176 @@
+<div class="checkout-container">
+  <h1>📦 Checkout</h1>
+
+  @if (pedidoCreado()) {
+    <div class="exito-container">
+      <div class="icono-exito">✓</div>
+      <h2>¡Pedido creado exitosamente!</h2>
+      <p class="numero-pedido">Número de pedido: <strong>{{ numeroPedido() }}</strong></p>
+      <p class="mensaje">
+        Te hemos enviado la información a tu correo y teléfono.
+        Redirigiéndote a seguimiento en unos momentos...
+      </p>
+      <a routerLink="/cliente/seguimiento" class="btn btn-primary">
+        Ver estado del pedido →
+      </a>
+    </div>
+  } @else {
+    <div class="checkout-contenido">
+      <!-- Resumen del Carrito -->
+      <div class="columna-resumen">
+        <div class="card-resumen">
+          <h2>Resumen de tu pedido</h2>
+
+          @if (carrito.items.length === 0) {
+            <div class="vacio-aviso">
+              <p>Tu carrito está vacío</p>
+              <a routerLink="/cliente" class="btn btn-secondary btn-sm">
+                Volver al catálogo
+              </a>
+            </div>
+          } @else {
+            <div class="items-lista">
+              @for (item of carrito.items; track trackById($index, item)) {
+                <div class="item-resumen">
+                  <div class="item-info">
+                    <span class="item-nombre">{{ item.producto.nombre }}</span>
+                    <span class="item-cantidad">× {{ item.cantidad }}</span>
+                  </div>
+                  <span class="item-precio">{{ formatoPrecio(item.subtotal) }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="totales">
+              <div class="linea-total">
+                <span>Subtotal:</span>
+                <span>{{ formatoPrecio(carrito.total) }}</span>
+              </div>
+              <div class="linea-total">
+                <span>Envío:</span>
+                <span>Por consultar</span>
+              </div>
+              <div class="linea-total gran-total">
+                <span>TOTAL:</span>
+                <span>{{ formatoPrecio(carrito.total) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      @if (carrito.items.length > 0) {
+        <div class="columna-formulario">
+          <form [formGroup]="formulario" (ngSubmit)="enviar()" class="form-checkout">
+            @if (error()) {
+              <div class="banner-error">
+                {{ error() }}
+              </div>
+            }
+
+            <fieldset>
+              <legend>Datos personales</legend>
+
+              <div class="form-group">
+                <label for="nombreCliente">Nombre completo *</label>
+                <input
+                  type="text"
+                  id="nombreCliente"
+                  formControlName="nombreCliente"
+                  class="form-control"
+                  placeholder="Juan Pérez"
+                />
+                @if (formulario.get('nombreCliente')?.hasError('required') && formulario.get('nombreCliente')?.touched) {
+                  <span class="error-msg">El nombre es requerido</span>
+                }
+                @if (formulario.get('nombreCliente')?.hasError('minlength') && formulario.get('nombreCliente')?.touched) {
+                  <span class="error-msg">Mínimo 3 caracteres</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="telefonoCliente">Teléfono *</label>
+                <input
+                  type="tel"
+                  id="telefonoCliente"
+                  formControlName="telefonoCliente"
+                  class="form-control"
+                  placeholder="987654321"
+                />
+                @if (formulario.get('telefonoCliente')?.hasError('required') && formulario.get('telefonoCliente')?.touched) {
+                  <span class="error-msg">El teléfono es requerido</span>
+                }
+                @if (formulario.get('telefonoCliente')?.hasError('pattern') && formulario.get('telefonoCliente')?.touched) {
+                  <span class="error-msg">Ingresa un teléfono válido (9 dígitos)</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="correoCliente">Correo electrónico</label>
+                <input
+                  type="email"
+                  id="correoCliente"
+                  formControlName="correoCliente"
+                  class="form-control"
+                  placeholder="tu@correo.com"
+                />
+                @if (formulario.get('correoCliente')?.hasError('email') && formulario.get('correoCliente')?.touched) {
+                  <span class="error-msg">Ingresa un correo válido</span>
+                }
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Entrega</legend>
+
+              <div class="form-group">
+                <label for="direccionEntrega">Dirección de entrega *</label>
+                <textarea
+                  id="direccionEntrega"
+                  formControlName="direccionEntrega"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Calle Principal 123, Apt 4B, Lima"
+                ></textarea>
+                @if (formulario.get('direccionEntrega')?.hasError('required') && formulario.get('direccionEntrega')?.touched) {
+                  <span class="error-msg">La dirección es requerida</span>
+                }
+                @if (formulario.get('direccionEntrega')?.hasError('minlength') && formulario.get('direccionEntrega')?.touched) {
+                  <span class="error-msg">Ingresa una dirección más detallada</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="observaciones">Observaciones</label>
+                <textarea
+                  id="observaciones"
+                  formControlName="observaciones"
+                  class="form-control"
+                  rows="2"
+                  placeholder="Ej: Entregar después de las 5pm"
+                ></textarea>
+              </div>
+            </fieldset>
+
+            <button
+              type="submit"
+              [disabled]="!formulario.valid || enviando() || carrito.items.length === 0"
+              class="btn btn-primary btn-lg"
+            >
+              @if (enviando()) {
+                <span>Procesando...</span>
+              } @else {
+                <span>Completar Pedido</span>
+              }
+            </button>
+
+            <a routerLink="/cliente/carrito" class="btn btn-secondary">
+              Volver al carrito
+            </a>
+          </form>
+        </div>
+      }
+    </div>
+  }
+</div>

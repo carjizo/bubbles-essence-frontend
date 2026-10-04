@@ -1,0 +1,60 @@
+<form (ngSubmit)="guardar()">
+  @if (error()) {
+    <div class="form-error">{{ error() }}</div>
+  }
+
+  <div class="form-group">
+    <label for="codigo">Código</label>
+    <input
+      type="text"
+      id="codigo"
+      [(ngModel)]="form.codigo"
+      name="codigo"
+      placeholder="ej: btn-editar-producto"
+      required
+    />
+    <small>Identificador único de la acción (usado en el frontend)</small>
+  </div>
+
+  <div class="form-group">
+    <label for="nombre">Nombre</label>
+    <input
+      type="text"
+      id="nombre"
+      [(ngModel)]="form.nombre"
+      name="nombre"
+      placeholder="ej: Editar producto"
+      required
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="descripcion">Descripción</label>
+    <textarea
+      id="descripcion"
+      [(ngModel)]="form.descripcion"
+      name="descripcion"
+      rows="3"
+      placeholder="Opcional: descripción de qué permite esta acción"
+    ></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="moduloId">Módulo</label>
+    <select id="moduloId" [(ngModel)]="form.moduloId" name="moduloId" required>
+      <option value="" disabled>-- Selecciona un módulo --</option>
+      @for (modulo of modulos(); track modulo.id) {
+        <option [value]="modulo.id">{{ modulo.codigo }} - {{ modulo.nombre }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="enviando()">
+      {{ enviando() ? 'Guardando…' : 'Guardar' }}
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="cancelado.emit()">
+      Cancelar
+    </button>
+  </div>
+</form>

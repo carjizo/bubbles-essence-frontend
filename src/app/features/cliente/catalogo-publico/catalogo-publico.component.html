@@ -1,0 +1,83 @@
+<div class="catalogo">
+  <header class="catalogo-header">
+    <div>
+      <h1>Catálogo de Productos</h1>
+      <p class="subtitle">Los mejores jabones artesanales para ti</p>
+    </div>
+    <a routerLink="/cliente/carrito" class="btn btn-primary">
+      🛒 Ver Carrito
+    </a>
+  </header>
+
+  <!-- Banner de registro para clientes no logueados -->
+  @if (!estaClienteLogueado()) {
+    <div class="banner-registro">
+      <div class="banner-content">
+        <div class="banner-text">
+          <h3>🎁 Crea tu cuenta</h3>
+          <p>Accede a tu historial de pedidos y obtén ofertas exclusivas</p>
+        </div>
+        <div class="banner-actions">
+          <a routerLink="/cliente/registro" class="btn btn-bright">
+            ✍️ Crear Cuenta
+          </a>
+          <a routerLink="/cliente/login" class="btn btn-light">
+            🔓 Iniciar Sesión
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="banner-error">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="loading-container">
+      <p>Cargando productos...</p>
+    </div>
+  } @else if (productos().length === 0) {
+    <div class="empty-container">
+      <p>No hay productos disponibles en este momento</p>
+    </div>
+  } @else {
+    <div class="grid-productos">
+      @for (producto of productos(); track trackById($index, producto)) {
+        <div class="card-producto">
+          <div class="imagen-container">
+            @if (producto.imagenUrl) {
+              <img [src]="producto.imagenUrl" [alt]="producto.nombre" class="producto-imagen" />
+            } @else {
+              <div class="producto-imagen-placeholder">
+                <span>📦</span>
+              </div>
+            }
+          </div>
+
+          <div class="card-content">
+            <h3>{{ producto.nombre }}</h3>
+            @if (producto.descripcion) {
+              <p class="descripcion">{{ producto.descripcion }}</p>
+            }
+
+            <div class="producto-info">
+              <span class="precio">{{ formatoPrecio(producto.precio) }}</span>
+              @if (producto.stock > 0) {
+                <span class="stock">{{ producto.stock }} en stock</span>
+              } @else {
+                <span class="stock-agotado">Agotado</span>
+              }
+            </div>
+
+            <div class="card-actions">
+              <a [routerLink]="['/cliente/productos', producto.id]" class="btn btn-secondary btn-sm">
+                Ver Detalles
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,50 @@
+<form (ngSubmit)="guardar()">
+  @if (error()) {
+    <div class="form-error">{{ error() }}</div>
+  }
+
+  <div class="form-group">
+    <label for="codigo">Código</label>
+    <input
+      type="text"
+      id="codigo"
+      [(ngModel)]="form.codigo"
+      name="codigo"
+      placeholder="ej: VENDEDORES"
+      required
+    />
+    <small>Identificador único del grupo</small>
+  </div>
+
+  <div class="form-group">
+    <label for="nombre">Nombre</label>
+    <input
+      type="text"
+      id="nombre"
+      [(ngModel)]="form.nombre"
+      name="nombre"
+      placeholder="ej: Grupo de Vendedores"
+      required
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="descripcion">Descripción</label>
+    <textarea
+      id="descripcion"
+      [(ngModel)]="form.descripcion"
+      name="descripcion"
+      rows="3"
+      placeholder="Opcional: descripción del grupo"
+    ></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="enviando()">
+      {{ enviando() ? 'Guardando…' : 'Guardar' }}
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="cancelado.emit()">
+      Cancelar
+    </button>
+  </div>
+</form>

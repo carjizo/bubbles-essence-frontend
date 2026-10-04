@@ -1,0 +1,122 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Catálogo</h1>
+      <p class="page-subtitle">Los jabones que ve cualquier visitante al armar su pedido.</p>
+    </div>
+    <button type="button" class="btn btn-primary" *appHasAccion="'btn-crear-producto'" (click)="abrirCrear()">
+      + Nuevo producto
+    </button>
+  </header>
+
+  @if (vistaFormulario(); as vista) {
+    <div class="form-slot">
+      <app-producto-form
+        [producto]="vista.modo === 'editar' ? vista.producto : null"
+        (guardado)="alGuardar()"
+        (cancelado)="cerrarFormulario()"
+      ></app-producto-form>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="banner-error">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <p class="page-estado">Cargando catálogo…</p>
+  } @else if (productos().length === 0) {
+    <p class="page-estado">Todavía no hay productos cargados.</p>
+  } @else {
+    <div class="grid">
+      @for (producto of productos(); track trackById($index, producto)) {
+        <article class="card" [class.card-inactivo]="!producto.activo">
+          <div class="card-imagen-container">
+            @if (producto.imagenUrl) {
+              <img [src]="producto.imagenUrl" [alt]="producto.nombre" class="card-imagen" />
+            } @else {
+              <div class="card-imagen-placeholder">
+                <span>📦</span>
+              </div>
+            }
+            <button class="btn-editar-imagen" (click)="abrirEditarImagen(producto)" title="Editar imagen" type="button">
+              ✏️
+            </button>
+          </div>
+
+          <div class="card-top">
+            <h3>{{ producto.nombre }}</h3>
+            <span class="badge" [class.badge-success]="producto.activo" [class.badge-muted]="!producto.activo">
+              {{ producto.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          @if (producto.descripcion) {
+            <p class="card-desc">{{ producto.descripcion }}</p>
+          }
+
+          <p class="card-precio">S/ {{ producto.precio.toFixed(2) }}</p>
+
+          <div class="card-actions">
+            <button type="button" class="btn btn-secondary btn-sm" *appHasAccion="'btn-editar-producto'" (click)="abrirEditar(producto)">
+              Editar
+            </button>
+            @if (producto.activo) {
+              <button type="button" class="btn btn-danger btn-sm" *appHasAccion="'btn-eliminar-producto'" (click)="desactivar(producto)">
+                Desactivar
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+
+  <!-- Modal para editar imagen -->
+  @if (productoEditandoImagen()) {
+    <div class="modal-overlay" (click)="cerrarEditarImagen()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Editar Imagen - {{ productoEditandoImagen()?.nombre }}</h2>
+          <button class="btn-close" (click)="cerrarEditarImagen()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          @if (errorImagen()) {
+            <div class="banner-error">{{ errorImagen() }}</div>
+          }
+
+          <div class="preview-container">
+            <div class="imagen-preview">
+              @if (nuevaImagenUrl()) {
+                <img [src]="nuevaImagenUrl()" [alt]="productoEditandoImagen()?.nombre" />
+              } @else {
+                <div class="imagen-vacia">Sin imagen</div>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>URL de la Imagen</label>
+            <input
+              type="url"
+              [(ngModel)]="nuevaImagenUrl"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              class="form-control"
+              [disabled]="actualizandoImagen()"
+            />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="cerrarEditarImagen()" [disabled]="actualizandoImagen()">
+            Cancelar
+          </button>
+          <button class="btn btn-primary" (click)="guardarImagen()" [disabled]="actualizandoImagen()">
+            {{ actualizandoImagen() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

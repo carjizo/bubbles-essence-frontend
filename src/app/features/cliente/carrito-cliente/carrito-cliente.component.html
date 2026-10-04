@@ -1,0 +1,96 @@
+<div class="carrito-container">
+  <a routerLink="/cliente" class="link-volver">← Volver al catálogo</a>
+
+  <h1>🛒 Tu Carrito</h1>
+
+  @if (carritoService.carrito().items.length === 0) {
+    <div class="carrito-vacio">
+      <p class="emoji">📦</p>
+      <p>Tu carrito está vacío</p>
+      <a routerLink="/cliente" class="btn btn-primary">
+        Continuar comprando
+      </a>
+    </div>
+  } @else {
+    <div class="carrito-contenido">
+      <div class="carrito-items">
+        <div class="header-tabla">
+          <div class="col-producto">Producto</div>
+          <div class="col-precio">Precio</div>
+          <div class="col-cantidad">Cantidad</div>
+          <div class="col-subtotal">Subtotal</div>
+          <div class="col-acciones"></div>
+        </div>
+
+        @for (item of carritoService.carrito().items; track item.productoId) {
+          <div class="item-carrito">
+            <div class="col-producto">
+              <a [routerLink]="['/cliente/productos', item.productoId]" class="nombre-producto">
+                {{ item.producto.nombre }}
+              </a>
+            </div>
+            <div class="col-precio">{{ formatoPrecio(item.producto.precio) }}</div>
+            <div class="col-cantidad">
+              <div class="cantidad-control-small">
+                <button
+                  type="button"
+                  (click)="decrementarCantidad(item.productoId, item.cantidad)"
+                  class="btn-sm"
+                  [disabled]="item.cantidad <= 1"
+                >
+                  −
+                </button>
+                <span>{{ item.cantidad }}</span>
+                <button
+                  type="button"
+                  (click)="incrementarCantidad(item.productoId, item.cantidad)"
+                  class="btn-sm"
+                  [disabled]="item.cantidad >= item.producto.stock"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="col-subtotal">{{ formatoPrecio(item.subtotal) }}</div>
+            <div class="col-acciones">
+              <button
+                type="button"
+                (click)="quitarProducto(item.productoId)"
+                class="btn-eliminar"
+                title="Eliminar del carrito"
+              >
+                🗑
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="carrito-resumen">
+        <div class="resumen-detalle">
+          <div class="fila-resumen">
+            <span>Cantidad de productos:</span>
+            <strong>{{ carritoService.carrito().cantidadTotal }}</strong>
+          </div>
+          <div class="fila-resumen total">
+            <span>TOTAL:</span>
+            <strong>{{ formatoPrecio(carritoService.carrito().total) }}</strong>
+          </div>
+        </div>
+
+        <div class="carrito-acciones">
+          <a routerLink="/cliente" class="btn btn-secondary">
+            Seguir comprando
+          </a>
+          <a routerLink="/cliente/checkout" class="btn btn-primary">
+            Proceder al Checkout →
+          </a>
+        </div>
+
+        <button type="button" (click)="limpiarCarrito()" class="btn-limpiar">
+          Limpiar carrito
+        </button>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,69 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Gestión de Acciones</h1>
+      <p class="page-subtitle">Define y administra las acciones/permisos disponibles en el sistema.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="abrirCrear()">
+      + Nueva acción
+    </button>
+  </header>
+
+  @if (error()) {
+    <div class="banner-error">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <p class="page-estado">Cargando acciones…</p>
+  } @else if (acciones().length === 0) {
+    <p class="page-estado">No hay acciones definidas aún.</p>
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Módulo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (accion of acciones(); track trackById($index, accion)) {
+            <tr>
+              <td><code>{{ accion.codigo }}</code></td>
+              <td>{{ accion.nombre }}</td>
+              <td><code>{{ accion.moduloCodigo }}</code></td>
+              <td>
+                <span class="badge" [class.badge-success]="accion.activo" [class.badge-muted]="!accion.activo">
+                  {{ accion.activo ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="table-actions">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="abrirEditar(accion)">Editar</button>
+                <button type="button" class="btn" [class.btn-danger]="accion.activo" [class.btn-success]="!accion.activo" (click)="toggleEstado(accion)">
+                  {{ accion.activo ? 'Desactivar' : 'Activar' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (vistaFormulario(); as vista) {
+    <div class="modal-overlay" (click)="cerrarFormulario()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>{{ vista.modo === 'crear' ? 'Nueva acción' : 'Editar acción' }}</h2>
+        <p class="modal-subtitle">{{ vista.modo === 'crear' ? 'Define una nueva acción/permiso' : 'Actualiza los datos de la acción' }}</p>
+        <app-accion-form
+          [accion]="vista.modo === 'editar' ? vista.accion : undefined"
+          (guardado)="alGuardarAccion()"
+          (cancelado)="cerrarFormulario()"
+        ></app-accion-form>
+      </div>
+    </div>
+  }
+</div>

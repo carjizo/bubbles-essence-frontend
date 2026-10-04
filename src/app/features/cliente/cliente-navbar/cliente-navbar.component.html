@@ -1,0 +1,127 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <div class="navbar-brand">
+      <a routerLink="/cliente" class="logo">
+        <span class="logo-circle">b&e</span>
+      </a>
+    </div>
+
+    <!-- Menu toggle (mobile) -->
+    <button class="menu-toggle" [class.active]="menuAbierto()" (click)="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Navigation menu -->
+    <ul class="nav-menu" [class.active]="menuAbierto()">
+      <li class="nav-item">
+        <a
+          routerLink="/cliente"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          (click)="closeMenu()"
+        >
+          📦 Catálogo
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a
+          routerLink="/cliente/carrito"
+          routerLinkActive="active"
+          class="nav-link carrito-link"
+          (click)="closeMenu()"
+        >
+          🛒 Carrito
+          @if (carrito.cantidadTotal > 0) {
+            <span class="badge-carrito">{{ carrito.cantidadTotal }}</span>
+          }
+        </a>
+      </li>
+
+      <!-- Mis Pedidos: solo para logueados -->
+      @if (estaClienteLogueado()) {
+        <li class="nav-item">
+          <a
+            routerLink="/cliente/mis-pedidos"
+            routerLinkActive="active"
+            class="nav-link nav-link-mis-pedidos"
+            (click)="closeMenu()"
+          >
+            📦 Mis Pedidos
+          </a>
+        </li>
+      }
+
+      <!-- Seguimiento: para todos (logueados e invitados) -->
+      <li class="nav-item">
+        <a
+          routerLink="/cliente/seguimiento"
+          routerLinkActive="active"
+          class="nav-link"
+          (click)="closeMenu()"
+        >
+          📍 Seguimiento
+        </a>
+      </li>
+
+      <!-- Cliente logueado: mostrar nombre y logout -->
+      @if (estaClienteLogueado()) {
+        <li class="nav-item-separator"></li>
+        <li class="nav-item">
+          <span class="nav-link nav-cliente-nombre">
+            👤 {{ nombreCliente() }}
+          </span>
+        </li>
+        <li class="nav-item">
+          <button
+            type="button"
+            (click)="logoutCliente(); closeMenu()"
+            class="nav-link btn-logout"
+          >
+            🚪 Cerrar Sesión
+          </button>
+        </li>
+      } @else {
+        <!-- Cliente NO logueado: mostrar botones de registro e inicio de sesión -->
+        <li class="nav-item-separator"></li>
+        <li class="nav-item">
+          <a
+            routerLink="/cliente/registro"
+            class="nav-link nav-link-register"
+            (click)="closeMenu()"
+          >
+            ✍️ Crear Cuenta
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            routerLink="/cliente/login"
+            class="nav-link nav-link-login-cliente"
+            (click)="closeMenu()"
+          >
+            🔓 Iniciar Sesión
+          </a>
+        </li>
+      }
+
+      <!-- Panel interno para staff/admin -->
+      @if (estaAutenticado) {
+        <li class="nav-item-separator"></li>
+        <li class="nav-item">
+          <a
+            routerLink="/admin/seguimiento-interno"
+            routerLinkActive="active"
+            class="nav-link nav-link-admin"
+            (click)="closeMenu()"
+          >
+            🔐 Panel Interno
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</nav>

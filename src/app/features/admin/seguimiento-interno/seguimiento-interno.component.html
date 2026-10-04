@@ -1,0 +1,612 @@
+<div class="seguimiento-interno-container">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>📦 Gestión de Pedidos (Interno)</h1>
+    <p class="subtitle">Visualiza, busca y gestiona el estado de los pedidos de los clientes</p>
+  </div>
+
+  <!-- ERROR MESSAGE -->
+  @if (error()) {
+    <div class="banner-error">
+      <span class="error-icon">⚠️</span>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <!-- LEFT SIDEBAR: FILTROS -->
+    <aside class="filtros-sidebar">
+      <div class="filtros-card">
+        <h3>Filtrar por Estado</h3>
+        <div class="filtro-list">
+          @for (estado of ['TODOS', 'PENDING_PAYMENT', 'PAID', 'PREPARING', 'READY_TO_SHIP', 'SHIPPED', 'DELIVERED', 'CANCELLED']; track estado) {
+            <button
+              type="button"
+              class="filtro-btn"
+              [class.activo]="filtroEstado() === estado"
+              (click)="cambiarFiltro(estado)"
+            >
+              <span class="filtro-label">
+                @if (estado === 'TODOS') {
+                  📊 Todos
+                }
+                @if (estado === 'PENDING_PAYMENT') {
+                  ⏳ Pendientes
+                }
+                @if (estado === 'PAID') {
+                  ✅ Confirmados
+                }
+                @if (estado === 'PREPARING') {
+                  👨‍🍳 Preparación
+                }
+                @if (estado === 'READY_TO_SHIP') {
+                  📦 Listo
+                }
+                @if (estado === 'SHIPPED') {
+                  🚚 Tránsito
+                }
+                @if (estado === 'DELIVERED') {
+                  🏁 Entregados
+                }
+                @if (estado === 'CANCELLED') {
+                  ❌ Cancelados
+                }
+              </span>
+              <!-- <span class="badge">{{ contadores()[estado] }}</span> -->
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- BÚSQUEDA POR CÓDIGO -->
+      <div class="filtros-card">
+        <h3>🔍 Buscar Pedido</h3>
+        <form (ngSubmit)="buscar()">
+          <div class="form-group">
+            <input
+              type="text"
+              [(ngModel)]="busqueda"
+              name="busqueda"
+              class="form-control"
+              placeholder="Ej: PED-2026-000001"
+              [disabled]="buscando()"
+            />
+          </div>
+          <div class="btn-group-vertical">
+            <button type="submit" [disabled]="buscando()" class="btn btn-primary">
+              @if (buscando()) {
+                <span>Buscando...</span>
+              } @else {
+                <span>🔍 Buscar</span>
+              }
+            </button>
+            @if (busqueda()) {
+              <button type="button" (click)="limpiar()" class="btn btn-secondary">
+                Limpiar búsqueda
+              </button>
+            }
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN: LISTA DE PEDIDOS -->
+    <section class="pedidos-section">
+      <!-- Título y contador -->
+      <div class="section-header">
+        <h2>
+          @if (pedidos().length > 0) {
+            Resultados de búsqueda
+          } @else {
+            @if (cargandoLista()) {
+              Cargando pedidos...
+            } @else {
+              @if (filtroEstado() === 'TODOS') {
+                Todos los pedidos
+              } @else {
+                Pedidos {{ getEstadoTexto(filtroEstado()) }}
+              }
+            }
+          }
+        </h2>
+        @if (!buscando() && !cargandoLista()) {
+          <span class="contador">{{ pedidosFiltrados().length }} pedido(s)</span>
+        }
+      </div>
+
+      <!-- LOADING STATE -->
+      @if (cargandoLista()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Cargando lista de pedidos...</p>
+        </div>
+      }
+
+      <!-- EMPTY STATE -->
+      @if (!cargandoLista() && pedidosFiltrados().length === 0 && pedidos().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📭</span>
+          <p>No hay pedidos con este filtro</p>
+        </div>
+      }
+
+      <!-- LISTA DE PEDIDOS -->
+      @if (pedidos().length > 0) {
+        <!-- Resultados de búsqueda -->
+        @for (pedido of pedidos(); track pedido.id) {
+          <div class="card-pedido" [class.expanded]="selectedPedido() === pedido">
+            <!-- HEADER -->
+            <div class="pedido-header" (click)="verDetalles(pedido)">
+              <div class="header-left">
+                <div class="codigo-estado">
+                  <h3>{{ pedido.codigoPedido }}</h3>
+                  <span [class]="'badge ' + getEstadoClass(pedido.estadoPedido)">
+                    {{ getEstadoEmoji(pedido.estadoPedido) }} {{ getEstadoTexto(pedido.estadoPedido) }}
+                  </span>
+                </div>
+                <p class="cliente-info">
+                  <strong>{{ pedido.invitadoNombre }}</strong> | 📞 {{ pedido.invitadoTelefono }}
+                </p>
+                <p class="fecha-info">
+                  📅 {{ formatoFecha(pedido.fechaPedido) }}
+                </p>
+              </div>
+
+              <div class="header-right">
+                <div class="monto-total">
+                  <span class="label">Total:</span>
+                  <span class="precio">{{ formatoPrecio(pedido.montoTotal) }}</span>
+                </div>
+                <button type="button" class="btn-expandir" [class.activo]="selectedPedido() === pedido">
+                  {{ selectedPedido() === pedido ? '▼' : '▶' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- DETALLES -->
+            @if (selectedPedido() === pedido) {
+              <div class="pedido-detalles">
+                <!-- Información de Entrega -->
+                <div class="detalle-section">
+                  <h4>🚚 Información de Entrega</h4>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <span class="label">Tipo:</span>
+                      <span>{{ pedido.tipoEntrega === 'RECOJO' ? '🏪 Recojo' : '🚗 Delivery' }}</span>
+                    </div>
+                    @if (pedido.direccionEntrega) {
+                      <div class="info-item full-width">
+                        <span class="label">Dirección:</span>
+                        <span>{{ pedido.direccionEntrega }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Productos -->
+                @if (pedido.detalles && pedido.detalles.length > 0) {
+                  <div class="detalle-section">
+                    <h4>🛍️ Productos</h4>
+                    <div class="tabla-productos">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (detalle of pedido.detalles; track detalle.id) {
+                            <tr>
+                              <td>{{ detalle.productoNombre }}</td>
+                              <td class="text-center">{{ detalle.cantidad }}</td>
+                              <td class="text-right">{{ formatoPrecio(detalle.precioUnitario) }}</td>
+                              <td class="text-right"><strong>{{ formatoPrecio(detalle.subtotal) }}</strong></td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+
+                <!-- ACCIONES SEGÚN ESTADO -->
+                <div class="detalle-section acciones-section">
+                  <h4>⚡ Acciones Disponibles</h4>
+
+                  @if (pedido.estadoPedido === 'PENDING_PAYMENT') {
+                    <div class="acciones-grid">
+                      <button
+                        type="button"
+                        class="btn btn-success"
+                        (click)="abrirModalConfirmarPago(pedido)"
+                        [disabled]="confirmandoPago()"
+                      >
+                        ✅ Confirmar Pago
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-danger"
+                        (click)="abrirModalRechazarPago(pedido)"
+                        [disabled]="rechazandoPago()"
+                      >
+                        ❌ Rechazar Pago
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="acciones-grid">
+                      @if (getEstadosValidos(pedido.estadoPedido).length > 0) {
+                        <button
+                          type="button"
+                          class="btn btn-primary"
+                          (click)="abrirModalCambiarEstado(pedido)"
+                          [disabled]="cambiandoEstado()"
+                        >
+                          ➡️ Cambiar Estado
+                        </button>
+                      } @else {
+                        <p class="info-text">Este pedido no puede cambiar de estado</p>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      } @else {
+        <!-- Listado filtrado -->
+        @if (pedidosFiltrados().length > 0) {
+          @for (pedido of pedidosFiltrados(); track pedido.id) {
+            <div class="card-pedido" [class.expanded]="selectedPedido() === pedido">
+              <!-- HEADER -->
+              <div class="pedido-header" (click)="verDetalles(pedido)">
+                <div class="header-left">
+                  <div class="codigo-estado">
+                    <h3>{{ pedido.codigoPedido }}</h3>
+                    <span [class]="'badge ' + getEstadoClass(pedido.estadoPedido)">
+                      {{ getEstadoEmoji(pedido.estadoPedido) }} {{ getEstadoTexto(pedido.estadoPedido) }}
+                    </span>
+                  </div>
+                  <p class="cliente-info">
+                    <strong>{{ pedido.invitadoNombre }}</strong> | 📞 {{ pedido.invitadoTelefono }}
+                  </p>
+                  <p class="fecha-info">
+                    📅 {{ formatoFecha(pedido.fechaPedido) }}
+                  </p>
+                </div>
+
+                <div class="header-right">
+                  <div class="monto-total">
+                    <span class="label">Total:</span>
+                    <span class="precio">{{ formatoPrecio(pedido.montoTotal) }}</span>
+                  </div>
+                  <button type="button" class="btn-expandir" [class.activo]="selectedPedido() === pedido">
+                    {{ selectedPedido() === pedido ? '▼' : '▶' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- DETALLES -->
+              @if (selectedPedido() === pedido) {
+                <div class="pedido-detalles">
+                  <!-- Información de Entrega -->
+                  <div class="detalle-section">
+                    <h4>🚚 Información de Entrega</h4>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <span class="label">Tipo:</span>
+                        <span>{{ pedido.tipoEntrega === 'RECOJO' ? '🏪 Recojo' : '🚗 Delivery' }}</span>
+                      </div>
+                      @if (pedido.direccionEntrega) {
+                        <div class="info-item full-width">
+                          <span class="label">Dirección:</span>
+                          <span>{{ pedido.direccionEntrega }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Productos -->
+                  @if (pedido.detalles && pedido.detalles.length > 0) {
+                    <div class="detalle-section">
+                      <h4>🛍️ Productos</h4>
+                      <div class="tabla-productos">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Producto</th>
+                              <th>Cantidad</th>
+                              <th>Precio</th>
+                              <th>Subtotal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (detalle of pedido.detalles; track detalle.id) {
+                              <tr>
+                                <td>{{ detalle.productoNombre }}</td>
+                                <td class="text-center">{{ detalle.cantidad }}</td>
+                                <td class="text-right">{{ formatoPrecio(detalle.precioUnitario) }}</td>
+                                <td class="text-right"><strong>{{ formatoPrecio(detalle.subtotal) }}</strong></td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- ACCIONES SEGÚN ESTADO -->
+                  <div class="detalle-section acciones-section">
+                    <h4>⚡ Acciones Disponibles</h4>
+
+                    @if (pedido.estadoPedido === 'PENDING_PAYMENT') {
+                      <div class="acciones-grid">
+                        <button
+                          type="button"
+                          class="btn btn-success"
+                          (click)="abrirModalConfirmarPago(pedido)"
+                          [disabled]="confirmandoPago()"
+                        >
+                          ✅ Confirmar Pago
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-danger"
+                          (click)="abrirModalRechazarPago(pedido)"
+                          [disabled]="rechazandoPago()"
+                        >
+                          ❌ Rechazar Pago
+                        </button>
+                      </div>
+                    } @else {
+                      <div class="acciones-grid">
+                        @if (getEstadosValidos(pedido.estadoPedido).length > 0) {
+                          <button
+                            type="button"
+                            class="btn btn-primary"
+                            (click)="abrirModalCambiarEstado(pedido)"
+                            [disabled]="cambiandoEstado()"
+                          >
+                            ➡️ Cambiar Estado
+                          </button>
+                        } @else {
+                          <p class="info-text">Este pedido no puede cambiar de estado</p>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      }
+    </section>
+  </div>
+</div>
+
+<!-- ===== MODAL: Confirmar Pago ===== -->
+@if (showModalConfirmarPago()) {
+  <div class="modal-overlay" (click)="cerrarModalConfirmarPago()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>💳 Confirmar Pago del Pedido</h2>
+        <button type="button" class="btn-close" (click)="cerrarModalConfirmarPago()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        @if (selectedPedido()) {
+          <div class="info-box">
+            <strong>Pedido:</strong> {{ selectedPedido()!.codigoPedido }} | 
+            <strong>Monto Total:</strong> {{ formatoPrecio(selectedPedido()!.montoTotal) }}
+          </div>
+        }
+
+        <div class="form-group">
+          <label for="referencia">Referencia Yape/Plin: <span class="required">*</span></label>
+          <input
+            type="text"
+            id="referencia"
+            [(ngModel)]="referenciaYape"
+            class="form-control"
+            placeholder="Ej: 12345678"
+            [disabled]="confirmandoPago()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="monto">Monto Verificado (S/.): <span class="required">*</span></label>
+          <input
+            type="number"
+            id="monto"
+            [(ngModel)]="montoVerificado"
+            class="form-control"
+            step="0.01"
+            [disabled]="confirmandoPago()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="observacion">Observación (opcional):</label>
+          <textarea
+            id="observacion"
+            [(ngModel)]="observacionPago"
+            class="form-control"
+            rows="3"
+            placeholder="Ej: Dinero recibido en cuenta"
+            [disabled]="confirmandoPago()"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cerrarModalConfirmarPago()"
+          [disabled]="confirmandoPago()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="confirmarPago()"
+          [disabled]="confirmandoPago()"
+        >
+          @if (confirmandoPago()) {
+            <span>Procesando...</span>
+          } @else {
+            <span>✅ Confirmar Pago</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL: Rechazar Pago ===== -->
+@if (showModalRechazarPago()) {
+  <div class="modal-overlay" (click)="cerrarModalRechazarPago()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>❌ Rechazar Pago del Pedido</h2>
+        <button type="button" class="btn-close" (click)="cerrarModalRechazarPago()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="warning-box">
+          ⚠️ El cliente deberá reenviar el comprobante. El stock seguirá reservado.
+        </div>
+
+        <div class="form-group">
+          <label for="motivo">Motivo del Rechazo: <span class="required">*</span></label>
+          <select
+            id="motivo"
+            [(ngModel)]="motivoRechazo"
+            class="form-control"
+            [disabled]="rechazandoPago()"
+          >
+            <option value="">-- Selecciona un motivo --</option>
+            <option value="Comprobante no válido">Comprobante no válido</option>
+            <option value="Monto no coincide">Monto no coincide</option>
+            <option value="Número no encontrado en Yape">Número no encontrado en Yape</option>
+            <option value="Referencia duplicada">Referencia duplicada</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="observacionRechazo">Observación (para el cliente):</label>
+          <textarea
+            id="observacionRechazo"
+            [(ngModel)]="observacionRechazo"
+            class="form-control"
+            rows="3"
+            placeholder="Ej: No encontramos este número en Yape. Verifica la referencia."
+            [disabled]="rechazandoPago()"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cerrarModalRechazarPago()"
+          [disabled]="rechazandoPago()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="rechazarPago()"
+          [disabled]="rechazandoPago()"
+        >
+          @if (rechazandoPago()) {
+            <span>Procesando...</span>
+          } @else {
+            <span>❌ Rechazar Pago</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL: Cambiar Estado ===== -->
+@if (showModalCambiarEstado()) {
+  <div class="modal-overlay" (click)="cerrarModalCambiarEstado()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>➡️ Cambiar Estado del Pedido</h2>
+        <button type="button" class="btn-close" (click)="cerrarModalCambiarEstado()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        @if (selectedPedido()) {
+          <div class="info-box">
+            <strong>Pedido:</strong> {{ selectedPedido()!.codigoPedido }} | 
+            <strong>Estado Actual:</strong> {{ getEstadoTexto(selectedPedido()!.estadoPedido) }}
+          </div>
+        }
+
+        <div class="form-group">
+          <label for="nuevoEstado">Nuevo Estado: <span class="required">*</span></label>
+          <select
+            id="nuevoEstado"
+            [(ngModel)]="nuevoEstado"
+            class="form-control"
+            [disabled]="cambiandoEstado()"
+          >
+            @if (selectedPedido()) {
+              @for (estado of getEstadosValidos(selectedPedido()!.estadoPedido); track estado) {
+                <option [value]="estado">{{ getEstadoEmoji(estado) }} {{ getEstadoTexto(estado) }}</option>
+              }
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="observacionEstado">Observación (opcional):</label>
+          <textarea
+            id="observacionEstado"
+            [(ngModel)]="observacionEstado"
+            class="form-control"
+            rows="3"
+            placeholder="Ej: El pedido está listo para recoger"
+            [disabled]="cambiandoEstado()"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cerrarModalCambiarEstado()"
+          [disabled]="cambiandoEstado()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="cambiarEstado()"
+          [disabled]="cambiandoEstado()"
+        >
+          @if (cambiandoEstado()) {
+            <span>Procesando...</span>
+          } @else {
+            <span>➡️ Cambiar Estado</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
