@@ -35,14 +35,25 @@ export class AuthService {
     // Si al recargar la página ya había una sesión guardada, los accesos
     // (grupos/módulos/acciones) no sobreviven el refresh porque viven en un
     // signal en memoria, no en localStorage: hay que volver a pedirlos.
+    //
+    // OJO: no se llama aquí mismo, directo dentro del constructor. El
+    // interceptor HTTP hace inject(AuthService), y si el HTTP call se
+    // dispara mientras ESTE constructor todavía se está ejecutando, Angular
+    // lo trata como una dependencia circular (AuthService pidiéndose a sí
+    // mismo antes de terminar de construirse) y tira la petición ANTES de
+    // que llegue a la red -> por eso nunca aparecía en el Network tab.
+    // setTimeout(…, 0) difiere la llamada al siguiente tick, cuando el
+    // constructor ya terminó y AuthService ya es una instancia completa.
     if (this.sesion()) {
-      this.accesoService.cargarMisAccesos().subscribe({
-        error: () => {
-          // Solo hace logout si el token es realmente inválido (401).
-          // Otros errores (red, servidor) se ignoran para mantener la sesión guardada.
-          console.warn('Error al cargar accesos, pero la sesión local se mantiene');
-        },
-      });
+      setTimeout(() => {
+        this.accesoService.cargarMisAccesos().subscribe({
+          error: (err) => {
+            // Solo hace logout si el token es realmente inválido (401).
+            // Otros errores (red, servidor) se ignoran para mantener la sesión guardada.
+            console.warn('Error al cargar accesos, pero la sesión local se mantiene', err);
+          },
+        });
+      }, 0);
     }
   }
 

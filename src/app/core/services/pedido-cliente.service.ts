@@ -1,9 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext  } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
 import { CrearPedidoClienteRequest, PedidoCliente } from '../models/producto.model';
+import { USA_TOKEN_CLIENTE } from '../interceptors/cliente-request.context';
 
 @Injectable({ providedIn: 'root' })
 export class PedidoClienteService {
@@ -31,7 +32,9 @@ export class PedidoClienteService {
 
   /** Obtener todos los pedidos del cliente logueado */
   obtenerMisPedidos(): Observable<ApiResponse<PedidoCliente[]>> {
-    return this.http.get<ApiResponse<PedidoCliente[]>>(`${this.base}/mis-pedidos`);
+    return this.http.get<ApiResponse<PedidoCliente[]>>(`${this.base}/mis-pedidos`, {
+      context: new HttpContext().set(USA_TOKEN_CLIENTE, true),
+    });
   }
 
   /** Cancelar un pedido (público, con código + DNI) */
