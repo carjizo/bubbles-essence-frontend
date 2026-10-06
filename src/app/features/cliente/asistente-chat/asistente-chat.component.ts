@@ -300,11 +300,9 @@ export class AsistenteChatComponent implements AfterViewChecked {
         this.cargando.set(false);
         this.debeHacerScroll = true;
       },
-      error: () => {
-        this.mensajes.update((msgs) => [
-          ...msgs,
-          { autor: 'asistente', texto: 'No pude responder justo ahora. Intenta de nuevo en un momento.' },
-        ]);
+      error: (err) => {
+        const texto = this.obtenerMensajeDeError(err);
+        this.mensajes.update((msgs) => [...msgs, { autor: 'asistente', texto }]);
         this.cargando.set(false);
         this.debeHacerScroll = true;
       },
@@ -362,6 +360,25 @@ export class AsistenteChatComponent implements AfterViewChecked {
     }
 
     return html;
+  }
+
+  /**
+   * Distingue 3 casos de error para mostrar un mensaje útil en cada uno,
+   * en vez de uno genérico siempre:
+   * - 429 (rate limit): usa el mensaje real que arma el backend
+   *   (RateLimitExceededException), así el texto exacto vive en un solo
+   *   lugar (el backend) y no hay que mantenerlo duplicado acá.
+   * - TimeoutError: probablemente Render estaba "dormido" (free tier).
+   * - cualquier otro: error genérico.
+   */
+  private obtenerMensajeDeError(err: any): string {
+    if (err?.status === 429) {
+      return err?.error?.message ?? 'Hiciste demasiadas preguntas seguidas. Espera un momento antes de volver a intentar.';
+    }
+    if (err?.name === 'TimeoutError') {
+      return 'Estoy tardando más de lo normal en responder (puede que el servidor recién esté arrancando). Intenta de nuevo en unos segundos 🙏';
+    }
+    return 'No pude responder justo ahora. Intenta de nuevo en un momento.';
   }
 
   /**
