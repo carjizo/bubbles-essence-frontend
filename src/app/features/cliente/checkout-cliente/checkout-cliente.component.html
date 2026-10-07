@@ -7,12 +7,40 @@
       <h2>¡Pedido creado exitosamente!</h2>
       <p class="numero-pedido">Número de pedido: <strong>{{ numeroPedido() }}</strong></p>
       <p class="mensaje">
-        Te hemos enviado la información a tu correo y teléfono.
-        Redirigiéndote a seguimiento en unos momentos...
+        Guarda tu código de pedido y tu DNI — los vas a necesitar para hacer seguimiento más adelante.
       </p>
-      <a routerLink="/cliente/seguimiento" class="btn btn-primary">
-        Ver estado del pedido →
-      </a>
+
+      @if (pedidoConfirmado(); as pedido) {
+        <div class="card-resumen resumen-confirmacion">
+          <h3>Resumen de tu pedido</h3>
+          <div class="items-lista">
+            @for (item of pedido.detalles; track item.id) {
+              <div class="item-resumen">
+                <div class="item-info">
+                  <span class="item-nombre">{{ item.productoNombre }}</span>
+                  <span class="item-cantidad">× {{ item.cantidad }}</span>
+                </div>
+                <span class="item-precio">{{ formatoPrecio(item.subtotal) }}</span>
+              </div>
+            }
+          </div>
+          <div class="totales">
+            <div class="linea-total">
+              <strong>TOTAL:</strong>
+              <strong>{{ formatoPrecio(pedido.montoTotal) }}</strong>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="acciones-confirmacion">
+        <button type="button" class="btn btn-secondary" (click)="descargarPdf()">
+          📄 Descargar PDF
+        </button>
+        <a routerLink="/cliente/seguimiento" class="btn btn-primary">
+          Ver estado del pedido →
+        </a>
+      </div>
     </div>
   } @else {
     <div class="checkout-contenido">
@@ -103,6 +131,26 @@
                 }
                 @if (formulario.get('telefonoCliente')?.hasError('pattern') && formulario.get('telefonoCliente')?.touched) {
                   <span class="error-msg">Ingresa un teléfono válido (9 dígitos)</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="dniCliente">DNI *</label>
+                <input
+                  type="text"
+                  id="dniCliente"
+                  formControlName="dniCliente"
+                  class="form-control"
+                  placeholder="12345678"
+                  maxlength="8"
+                  inputmode="numeric"
+                />
+                <small class="form-hint">Lo vas a necesitar para hacer seguimiento de tu pedido.</small>
+                @if (formulario.get('dniCliente')?.hasError('required') && formulario.get('dniCliente')?.touched) {
+                  <span class="error-msg">El DNI es requerido</span>
+                }
+                @if (formulario.get('dniCliente')?.hasError('pattern') && formulario.get('dniCliente')?.touched) {
+                  <span class="error-msg">Ingresa un DNI válido (8 dígitos)</span>
                 }
               </div>
 

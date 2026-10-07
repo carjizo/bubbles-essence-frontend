@@ -45,6 +45,8 @@ export interface CrearPedidoClienteRequest {
   clienteId?: number;
   invitadoNombre: string;
   invitadoTelefono: string;
+  invitadoDocumento: string;
+  invitadoCorreo?: string;
   tipoEntrega: 'RECOJO' | 'DELIVERY'; // RECOJO | DELIVERY
   direccionEntrega?: string;
   items: Array<{

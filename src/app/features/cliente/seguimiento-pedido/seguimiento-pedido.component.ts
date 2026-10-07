@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PedidoCliente } from '../../../core/models/producto.model';
 import { PedidoClienteService } from '../../../core/services/pedido-cliente.service';
 
@@ -14,6 +14,7 @@ import { PedidoClienteService } from '../../../core/services/pedido-cliente.serv
 })
 export class SeguimientoPedidoComponent implements OnInit {
   private readonly pedidoService = inject(PedidoClienteService);
+  private readonly route = inject(ActivatedRoute);
 
   // Búsqueda de invitado
   readonly codigoPedido = signal('');
@@ -26,7 +27,17 @@ export class SeguimientoPedidoComponent implements OnInit {
   readonly mostrarFormulario = signal(true);
 
   ngOnInit(): void {
-    // No hacer nada especial - solo mostrar el formulario de búsqueda
+    // Si venimos de un checkout recién hecho, el código y el documento
+    // llegan como query params -> buscamos directo, sin que el cliente
+    // tenga que volver a tipearlos.
+    const params = this.route.snapshot.queryParamMap;
+    const codigo = params.get('codigoPedido');
+    const documento = params.get('documento');
+    if (codigo && documento) {
+      this.codigoPedido.set(codigo);
+      this.dniCliente.set(documento);
+      this.buscarAutomatico(codigo, documento);
+    }
   }
 
   private buscarAutomatico(codigo: string, dni: string): void {
@@ -104,4 +115,3 @@ export class SeguimientoPedidoComponent implements OnInit {
     return estadoMap[estado] || estado;
   }
 }
-

@@ -340,3 +340,24 @@ textarea.form-control {
     font-size: 2.5em;
   }
 }
+
+.form-hint {
+  display: block;
+  font-size: 0.8em;
+  color: #777;
+  margin-top: 4px;
+}
+
+.resumen-confirmacion {
+  text-align: left;
+  max-width: 420px;
+  margin: 20px auto;
+}
+
+.acciones-confirmacion {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
