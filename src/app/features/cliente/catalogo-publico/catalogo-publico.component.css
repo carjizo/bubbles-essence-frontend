@@ -541,3 +541,312 @@
     font-size: 1.1em;
   }
 }
+
+/* ---------- Búsqueda predictiva ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 480px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 36px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.95em;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+}
+
+.search-clear:hover {
+  color: #333;
+}
+
+.search-hint {
+  margin: -10px 0 16px;
+  font-size: 0.85em;
+  color: #777;
+}
+
+.toolbar-total {
+  margin-left: auto;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.grid-cargando {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* ---------- Paginación ---------- */
+.paginacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+  flex-wrap: wrap;
+}
+
+.paginacion-info {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.paginacion-controles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pag-select {
+  height: 38px;
+  margin-left: 6px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.95em;
+}
+
+.pag-btn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font-family: inherit;
+  font-size: 0.95em;
+  cursor: pointer;
+}
+
+.pag-btn:hover:not(:disabled):not(.pag-activa) {
+  background: #f0f6ff;
+  border-color: #b9d6ff;
+}
+
+.pag-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pag-activa {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.aviso-limite {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.85em;
+  color: #777;
+}
+
+/* ---------- Botón de filtros ---------- */
+.btn-filtros,
+.drawer-footer .btn-secondary {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-filtros:hover,
+.drawer-footer .btn-secondary:hover {
+  background: #f3f6fb;
+}
+
+.btn-filtros {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+}
+
+.filtros-count {
+  background: #007bff;
+  color: #fff;
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Panel lateral de filtros ----------
+   z-index por encima de la navbar (100) y del botón del chat (1000),
+   si no el chat tapa el botón "Aplicar filtros". */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1100;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 340px;
+  max-width: 100vw;
+  background: #fff;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.18);
+  z-index: 1101;
+  display: flex;
+  flex-direction: column;
+  animation: drawer-entra 0.18s ease-out;
+}
+
+@keyframes drawer-entra {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.drawer-header h2 {
+  margin: 0;
+  font-size: 1.25em;
+}
+
+.drawer-close {
+  border: none;
+  background: none;
+  font-size: 1.1em;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.drawer-close:hover {
+  color: #111;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.drawer-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.drawer-footer .btn {
+  flex: 1;
+  width: auto;
+}
+
+.filtro-grupo {
+  margin-bottom: 22px;
+}
+
+.filtro-titulo {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.filtro-precios {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filtro-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+}
+
+.filtro-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.filtro-separador {
+  color: #888;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.error-filtros {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fdecec;
+  color: #b42318;
+  font-size: 0.9em;
+}

@@ -24,6 +24,11 @@ export interface FiltrosProducto {
   ingrediente?: string;
   codigo?: string;
   nombre?: string;
+  /** Precio mínimo / máximo (inclusive). */
+  precioMin?: number;
+  precioMax?: number;
+  /** true = solo productos con stock > 0. */
+  soloConStock?: boolean;
 }
 
 /** Espejo de ProductoRequestDTO */

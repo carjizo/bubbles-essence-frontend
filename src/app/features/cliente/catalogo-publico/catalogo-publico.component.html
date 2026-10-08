@@ -29,21 +29,53 @@
     </div>
   }
 
+  <!-- Búsqueda predictiva por ingrediente -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por ingrediente (ej. miel, avena)"
+        [ngModel]="terminoInput()"
+        (ngModelChange)="alEscribirBusqueda($event)"
+        aria-label="Buscar jabones por ingrediente"
+      />
+      @if (terminoInput()) {
+        <button type="button" class="search-clear" (click)="limpiarBusqueda()" aria-label="Limpiar búsqueda">✕</button>
+      }
+    </div>
+    <button type="button" class="btn btn-secondary btn-filtros" (click)="abrirFiltros()">
+      ⚙️ Filtros
+      @if (contadorFiltros() > 0) {
+        <span class="filtros-count">{{ contadorFiltros() }}</span>
+      }
+    </button>
+    <span class="toolbar-total">{{ productos().length }} producto(s)</span>
+  </div>
+  @if (avisoMinimo()) {
+    <p class="search-hint">Escribe al menos 3 caracteres para buscar por ingrediente.</p>
+  }
+
   @if (error()) {
     <div class="banner-error">{{ error() }}</div>
   }
 
-  @if (cargando()) {
+  @if (cargando() && productos().length === 0) {
     <div class="loading-container">
       <p>Cargando productos...</p>
     </div>
   } @else if (productos().length === 0) {
     <div class="empty-container">
-      <p>No hay productos disponibles en este momento</p>
+      @if (hayCriterios()) {
+        <p>No encontramos jabones con esos criterios. Prueba con otra palabra o quita algún filtro.</p>
+      } @else {
+        <p>No hay productos disponibles en este momento</p>
+      }
     </div>
   } @else {
-    <div class="grid-productos">
-      @for (producto of productos(); track trackById($index, producto)) {
+    <div class="grid-productos" [class.grid-cargando]="cargando()">
+      @for (producto of productosPagina(); track trackById($index, producto)) {
         <div class="card-producto">
           <div class="imagen-container">
             @if (producto.imagenUrl) {
@@ -79,5 +111,73 @@
         </div>
       }
     </div>
+
+    <nav class="paginacion" aria-label="Paginación del catálogo">
+      <span class="paginacion-info">Mostrando {{ rangoMostrado() }}</span>
+      <div class="paginacion-controles">
+        <button type="button" class="pag-btn" (click)="irAPagina(1)" [disabled]="paginaActual() === 1" aria-label="Primera página">«</button>
+        <button type="button" class="pag-btn" (click)="irAPagina(paginaActual() - 1)" [disabled]="paginaActual() === 1" aria-label="Página anterior">‹</button>
+        @for (n of paginas(); track n) {
+          <button type="button" class="pag-btn" [class.pag-activa]="n === paginaActual()" (click)="irAPagina(n)">{{ n }}</button>
+        }
+        <button type="button" class="pag-btn" (click)="irAPagina(paginaActual() + 1)" [disabled]="paginaActual() === totalPaginas()" aria-label="Página siguiente">›</button>
+        <button type="button" class="pag-btn" (click)="irAPagina(totalPaginas())" [disabled]="paginaActual() === totalPaginas()" aria-label="Última página">»</button>
+        <select class="pag-select" [ngModel]="tamanoPagina()" (ngModelChange)="cambiarTamano($event)" aria-label="Productos por página">
+          @for (n of opcionesTamano; track n) {
+            <option [ngValue]="n">{{ n }}</option>
+          }
+        </select>
+      </div>
+    </nav>
+
+    @if (alcanzoLimite()) {
+      <p class="aviso-limite">
+        Mostramos los {{ LIMITE_BACKEND }} productos más recientes. Usa el buscador para encontrar otros.
+      </p>
+    }
+  }
+
+  <!-- Panel lateral de filtros (se aplican contra la BD al pulsar "Aplicar filtros") -->
+  @if (panelFiltrosAbierto()) {
+    <div class="drawer-overlay" (click)="cerrarFiltros()"></div>
+    <aside class="drawer" role="dialog" aria-label="Filtros">
+      <div class="drawer-header">
+        <h2>Filtros</h2>
+        <button type="button" class="drawer-close" (click)="cerrarFiltros()" aria-label="Cerrar filtros">✕</button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="filtro-grupo">
+          <span class="filtro-titulo">Precio (S/)</span>
+          <div class="filtro-precios">
+            <input type="number" min="0" step="0.5" class="filtro-input" placeholder="Mínimo"
+                   [ngModel]="borrador().precioMin" (ngModelChange)="actualizarBorrador('precioMin', $event)"
+                   aria-label="Precio mínimo" />
+            <span class="filtro-separador">–</span>
+            <input type="number" min="0" step="0.5" class="filtro-input" placeholder="Máximo"
+                   [ngModel]="borrador().precioMax" (ngModelChange)="actualizarBorrador('precioMax', $event)"
+                   aria-label="Precio máximo" />
+          </div>
+        </div>
+
+        <div class="filtro-grupo">
+          <span class="filtro-titulo">Disponibilidad</span>
+          <label class="check">
+            <input type="checkbox" [ngModel]="borrador().soloConStock"
+                   (ngModelChange)="actualizarBorrador('soloConStock', $event)" />
+            Solo productos con stock
+          </label>
+        </div>
+
+        @if (errorFiltros()) {
+          <div class="error-filtros">{{ errorFiltros() }}</div>
+        }
+      </div>
+
+      <div class="drawer-footer">
+        <button type="button" class="btn btn-secondary" (click)="borrarFiltros()">Borrar filtros</button>
+        <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">Aplicar filtros</button>
+      </div>
+    </aside>
   }
 </div>

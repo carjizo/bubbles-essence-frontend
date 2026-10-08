@@ -38,6 +38,15 @@ export class ProductoService {
     if (filtros.nombre) {
       params = params.set('nombre', filtros.nombre);
     }
+    if (filtros.precioMin !== undefined) {
+      params = params.set('precioMin', filtros.precioMin);
+    }
+    if (filtros.precioMax !== undefined) {
+      params = params.set('precioMax', filtros.precioMax);
+    }
+    if (filtros.soloConStock) {
+      params = params.set('soloConStock', true);
+    }
     return this.http.get<ApiResponse<Producto[]>>(this.baseUrl, { params });
   }
 

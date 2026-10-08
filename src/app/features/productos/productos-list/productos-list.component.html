@@ -89,6 +89,10 @@
             <p class="card-desc">{{ producto.descripcion }}</p>
           }
 
+          @if (producto.codigo) {
+            <p class="card-codigo">Cód. <strong>{{ producto.codigo }}</strong></p>
+          }
+
           <p class="card-precio">S/ {{ producto.precio.toFixed(2) }}</p>
 
           <div class="card-actions">
