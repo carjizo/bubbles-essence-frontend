@@ -277,3 +277,249 @@
   border-radius: 6px;
   margin-bottom: 16px;
 }
+
+/* ---------- Barra de herramientas: búsqueda + filtros ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 460px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+}
+
+.search-clear:hover {
+  color: var(--color-ink);
+}
+
+.search-hint {
+  margin: -8px 0 14px;
+  font-size: 12.5px;
+  color: var(--color-muted);
+}
+
+.btn-filtros {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filtros-count {
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-total {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.grid-cargando {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* ---------- Paginación ---------- */
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.paginacion-info {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.paginacion-controles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pag-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pag-btn:hover:not(:disabled):not(.pag-activa) {
+  background: var(--color-primary-soft);
+}
+
+.pag-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pag-activa {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.pag-select {
+  height: 34px;
+  margin-left: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.aviso-limite {
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--color-muted);
+  text-align: right;
+}
+
+/* ---------- Panel lateral de filtros ---------- */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 42, 40, 0.35);
+  z-index: 90;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 340px;
+  max-width: 100vw;
+  background: var(--color-surface);
+  box-shadow: -8px 0 24px rgba(43, 42, 40, 0.18);
+  z-index: 91;
+  display: flex;
+  flex-direction: column;
+  animation: drawer-entra 0.18s ease-out;
+}
+
+@keyframes drawer-entra {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.drawer-header h2 {
+  font-size: 20px;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.drawer-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.drawer-footer .btn {
+  flex: 1;
+  padding: 10px 12px;
+}
+
+.filtro-fechas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.filtro-titulo {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px !important;
+  font-weight: 400 !important;
+  cursor: pointer;
+}

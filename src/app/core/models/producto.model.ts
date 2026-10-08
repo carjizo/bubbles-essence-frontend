@@ -13,6 +13,19 @@ export interface Producto {
   usuarioCreador: string;
 }
 
+/** Filtros opcionales del listado admin (espejo de los query params de GET /productos). */
+export interface FiltrosProducto {
+  activo?: boolean;
+  /** yyyy-MM-dd */
+  fechaDesde?: string;
+  /** yyyy-MM-dd */
+  fechaHasta?: string;
+  /** Búsqueda predictiva: productos con un ingrediente que contenga este texto (3+ caracteres). */
+  ingrediente?: string;
+  codigo?: string;
+  nombre?: string;
+}
+
 /** Espejo de ProductoRequestDTO */
 export interface ProductoRequest {
   codigo: string;
