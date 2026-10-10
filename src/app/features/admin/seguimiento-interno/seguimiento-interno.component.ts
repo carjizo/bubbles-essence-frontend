@@ -51,6 +51,32 @@ export class SeguimientoInternoComponent implements OnInit {
   readonly todosPedidos = signal<PedidoInterno[]>([]);
 
   // Computed: pedidos filtrados por estado
+  // ---- Paginación local, sobre los hasta 100 pedidos que trae el backend ----
+  readonly LIMITE_BACKEND = 100;
+  readonly opcionesTamano = [10, 20, 50];
+  readonly paginaActual = signal(1);
+  readonly tamanoPagina = signal(10);
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.todosPedidos().length / this.tamanoPagina())),
+  );
+  /** Página efectiva: si la lista se achica (cambio de estado, recarga tras confirmar un pago...), no queda una página inexistente. */
+  readonly pagina = computed(() => Math.min(this.paginaActual(), this.totalPaginas()));
+  readonly paginas = computed(() => Array.from({ length: this.totalPaginas() }, (_, i) => i + 1));
+  readonly pedidosPagina = computed(() => {
+    const inicio = (this.pagina() - 1) * this.tamanoPagina();
+    return this.todosPedidos().slice(inicio, inicio + this.tamanoPagina());
+  });
+  readonly rangoMostrado = computed(() => {
+    const total = this.todosPedidos().length;
+    if (total === 0) {
+      return '0';
+    }
+    const inicio = (this.pagina() - 1) * this.tamanoPagina() + 1;
+    const fin = Math.min(this.pagina() * this.tamanoPagina(), total);
+    return `${inicio}–${fin} de ${total}`;
+  });
+  readonly alcanzoLimite = computed(() => this.todosPedidos().length >= this.LIMITE_BACKEND);
+
   readonly pedidosFiltrados = computed(() => {
     const todos = this.todosPedidos();
     if (this.filtroEstado() === 'TODOS') return todos;
@@ -108,8 +134,24 @@ export class SeguimientoInternoComponent implements OnInit {
     });
   }
 
+  irAPagina(pagina: number): void {
+    if (pagina < 1 || pagina > this.totalPaginas() || pagina === this.pagina()) {
+      return;
+    }
+    this.paginaActual.set(pagina);
+    this.selectedPedido.set(null); // el pedido expandido ya no está en pantalla
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  cambiarTamano(tamano: number | string): void {
+    this.tamanoPagina.set(Number(tamano));
+    this.paginaActual.set(1);
+    this.selectedPedido.set(null);
+  }
+
   cambiarFiltro(estado: string): void {
     this.filtroEstado.set(estado as EstadoFiltro);
+    this.paginaActual.set(1);
     this.cargarTodosPedidos();
   }
 

@@ -260,7 +260,7 @@
       } @else {
         <!-- Listado filtrado -->
         @if (pedidosFiltrados().length > 0) {
-          @for (pedido of pedidosFiltrados(); track pedido.id) {
+          @for (pedido of pedidosPagina(); track pedido.id) {
             <div class="card-pedido" [class.expanded]="selectedPedido() === pedido">
               <!-- HEADER -->
               <div class="pedido-header" (click)="verDetalles(pedido)">
@@ -382,6 +382,31 @@
                 </div>
               }
             </div>
+          }
+
+          <!-- Paginación local sobre los pedidos que ya trajo el backend (máx. 100) -->
+          <nav class="paginacion" aria-label="Paginación de pedidos">
+            <span class="paginacion-info">Mostrando {{ rangoMostrado() }}</span>
+            <div class="paginacion-controles">
+              <button type="button" class="pag-btn" (click)="irAPagina(1)" [disabled]="pagina() === 1" aria-label="Primera página">«</button>
+              <button type="button" class="pag-btn" (click)="irAPagina(pagina() - 1)" [disabled]="pagina() === 1" aria-label="Página anterior">‹</button>
+              @for (n of paginas(); track n) {
+                <button type="button" class="pag-btn" [class.pag-activa]="n === pagina()" (click)="irAPagina(n)">{{ n }}</button>
+              }
+              <button type="button" class="pag-btn" (click)="irAPagina(pagina() + 1)" [disabled]="pagina() === totalPaginas()" aria-label="Página siguiente">›</button>
+              <button type="button" class="pag-btn" (click)="irAPagina(totalPaginas())" [disabled]="pagina() === totalPaginas()" aria-label="Última página">»</button>
+              <select class="pag-select" [ngModel]="tamanoPagina()" (ngModelChange)="cambiarTamano($event)" aria-label="Pedidos por página">
+                @for (n of opcionesTamano; track n) {
+                  <option [ngValue]="n">{{ n }}</option>
+                }
+              </select>
+            </div>
+          </nav>
+
+          @if (alcanzoLimite()) {
+            <p class="aviso-limite">
+              Se muestran los {{ LIMITE_BACKEND }} pedidos más recientes. Usa el filtro por estado o la búsqueda por código para ver otros.
+            </p>
           }
         }
       }
